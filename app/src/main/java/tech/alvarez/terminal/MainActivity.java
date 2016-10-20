@@ -3,6 +3,7 @@ package tech.alvarez.terminal;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -13,6 +14,7 @@ import java.io.OutputStreamWriter;
 public class MainActivity extends AppCompatActivity {
 
     private TextView terminalTextView;
+    private EditText commandEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         terminalTextView = (TextView) findViewById(R.id.terminalTextView);
+        commandEditText = (EditText) findViewById(R.id.commandEditText);
 
     }
 
@@ -69,6 +72,27 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public static String executeCommand(String command) {
+        StringBuffer output = new StringBuffer();
+
+        Process p;
+        try {
+            p = Runtime.getRuntime().exec(command);
+            p.waitFor();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+            String line = "";
+            while ((line = reader.readLine())!= null) {
+                output.append(line + "\n");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String response = output.toString();
+        return response;
+    }
+
     public static void rebootSU() {
         Runtime runtime = Runtime.getRuntime();
         Process proc = null;
@@ -107,5 +131,11 @@ public class MainActivity extends AppCompatActivity {
 //        sbstdErr.append(ReadBufferedReader(new InputStreamReader(proc.getErrorStream())));
         if (proc.exitValue() != 0) {
         }
+    }
+
+    public void run(View view) {
+        String command = commandEditText.getText().toString();
+        String result = executeCommand(command);
+        terminalTextView.setText(result);
     }
 }
